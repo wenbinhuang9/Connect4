@@ -3,6 +3,8 @@ import sys
 ## reference  https://github.com/noxsicarius/Connect4-Lisp
 ## http://blog.gamesolver.org/solving-connect-four/09-anticipate-losing-moves/
 ## one of naive method is going to use limited depeening skills?
+
+## todo make my algorithm very smart enough
 class Minmax():
     def __init__(self, row, col):
         self.row = row
@@ -12,15 +14,13 @@ class Minmax():
         self.player2 = "Michael"
         self.player1_x = 'x'
         self.player2_o = 'o'
+        self.empty = ' '
 
     def run(self):
         board = self.board
         cur_paler = self.player1
         count = 0
         while self.terminal_test(board) == False:
-            if count == 3:
-                return
-                print(count)
             count += 1
             i, j = self.play(board, cur_paler)
             self.fill_board(board, cur_paler, i, j )
@@ -43,7 +43,7 @@ class Minmax():
             maxx, pos = self.max_value(board, 5)
             return pos
 
-        minxx, pos = self.min_value(board, 3)
+        minxx, pos = self.min_value(board, 5)
 
         return pos
 
@@ -133,42 +133,61 @@ class Minmax():
 
 
     def node_utility(self, board):
-        two_adjacent, three_adjacent, four_adjacent = self.count_num_of_adjacent_by_row_or_col(board, self.player1_x)
-        paler1_socre = two_adjacent + three_adjacent * 100 + four_adjacent * (10000)
+        two_adjacent, three_adjacent = self.count_num_of_adjacent_by_row_or_col(board, self.player1_x)
+        paler1_socre = two_adjacent + three_adjacent * 100
 
-        two_adjacent, three_adjacent, four_adjacent = self.count_num_of_adjacent_by_row_or_col(board, self.player2_o)
-        paler2_socre = two_adjacent + three_adjacent * 100 + four_adjacent * (10000)
+        two_adjacent, three_adjacent = self.count_num_of_adjacent_by_row_or_col(board, self.player2_o)
+        paler2_socre = two_adjacent + three_adjacent * 100
 
         return paler1_socre - paler2_socre
 
+
+    def count_each_line_adjacent(self, line, player_symbol):
+
+        i = 0
+        two_adjacent , three_adjacent = 0, 0
+        while i < len(line):
+            if line[i] != self.empty:
+                if i - 1 >= 0 and line[i - 1] == self.empty and i + 2 < len(line) and line[i] == player_symbol == line[i + 1] == line[i + 2]:
+                    return (0, 1)
+                elif i - 1 >= 0 and line[i - 1] == self.empty and i + 1 < len(line) and line[i] == player_symbol == line[i + 1]:
+                    return (1, 0)
+                else:
+                    return (0, 0)
+            i += 1
+
+        return (0, 0)
+
     def count_num_of_adjacent_by_row_or_col(self, board, symbol):
-        four_adjacent, three_adjacent, two_adjacent = 0, 0, 0
+        three_adjacent, two_adjacent = 0, 0
         row = len(board)
         col = len(board[0])
 
         ## count for each row
         for i in range(row):
-            ans = self.count_each_row_adjacent(board[i], symbol)
-            four_adjacent += ans[4]
-            three_adjacent += ans[3]
-            two_adjacent += ans[2]
+            ans = self.count_each_line_adjacent(board[i], symbol)
+            three_adjacent += ans[1]
+            two_adjacent += ans[0]
+
+        for i in range(row):
+            ans = self.count_each_line_adjacent(board[i][::-1], symbol)
+            three_adjacent += ans[1]
+            two_adjacent += ans[0]
+
         ## count for each col
         for i in range(col):
             col_board = [board[j][i] for j in range(row)]
-            ans = self.count_each_row_adjacent(col_board, symbol)
-            four_adjacent += ans[4]
-            three_adjacent += ans[3]
-            two_adjacent += ans[2]
+            ans = self.count_each_line_adjacent(col_board, symbol)
+            three_adjacent += ans[1]
+            two_adjacent += ans[0]
+
         ## count for diagonal
         for diagonal_board in self.get_all_diagonal(board):
-            ans = self.count_each_row_adjacent(diagonal_board, symbol)
-            four_adjacent += ans[4]
-            three_adjacent += ans[3]
-            two_adjacent += ans[2]
+            ans = self.count_each_line_adjacent(diagonal_board, symbol)
+            three_adjacent += ans[1]
+            two_adjacent += ans[0]
 
-        return (two_adjacent, three_adjacent, four_adjacent)
-
-
+        return (two_adjacent, three_adjacent)
 
 
 
@@ -187,24 +206,6 @@ class Minmax():
 
         return diagonal_list
 
-    ## oh fuck, the code here is not readable
-    def count_each_row_adjacent(self, board_row, symbol):
-        try:
-            i, j = -1, 0
-            ans = [0 for i in range(self.row)]
-            while j < len(board_row):
-                if board_row[j] != symbol:
-                    ans[j - i - 1] +=1
-                    i = j
-                j +=1
-
-            if board_row[j - 1] == symbol:
-                 ans[j - i - 1] += 1
-            return ans
-        except:
-            print("board_row={0}".format(board_row))
-            print("symbol={0}".format(symbol))
-            raise
 
     def terminal_test(self, board, win_symbol = [' ']):
         if self.is_full(board) or self.row_test(board, win_symbol) or self.col_test(board,win_symbol) or self.diagonal_test(board,win_symbol):

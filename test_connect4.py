@@ -83,7 +83,7 @@ class MyTestCase(unittest.TestCase):
         print(score)
 
     def test_connect_four_play(self):
-        minmax = Minmax(7, 6)
+        minmax = Minmax(5, 5)
         minmax.run()
 
 if __name__ == '__main__':
