@@ -1,17 +1,28 @@
 
 
-
+;0 open, 1 player1, 2 player 2
 (defparameter board '(0 0 0 0 0
                       0 0 0 0 0
 					  0 0 0 0 0
 					  0 0 0 0 0
 					  0 0 0 0 0))
 
+(defparameter row 5)
+(defparameter col 5)
 (defparameter player1 1)
 (defparameter player2 2)
 
+(defun pos (i j)
+    (+ (* row i) j)
+)
+(defun get_e (i j)
+    (nth (pos i j) board)
+)
+(defun set_e (i j player)
+    (setf (nth (pos i j) board) player)
+)
 
-(run (player)
+(defun run (player)
     (while (terminal_test board)
         (
         play((next player))
@@ -74,28 +85,101 @@
 (defun min(board iteration) (
         ))
 
-(defun terminal_test(board) (
-        ))
 
-(defun node_utility ()
+(defun node_utility (board)
+    ()
+)
+(defun player_utility (board player)
     ()
 )
 
-(defun test-horizontal-win(board)
+(defun terminal_test(board)
+    (if (or (eq (test-horizontal-win board player1) 1)
+            (eq (test-horizontal-win board player2) 1)
+            (eq (test-vertical-win board player1) 1)
+            (eq (test-vertical-win board player2) 1)
+            (eq (test-diagonal-win_2 board player1) 1)
+            (eq (test-diagonal-win_2 board player2) 1)
+            (eq (test-diagonal-win_1 board player1) 1)
+            (eq (test-diagonal-win_1 board player2) 1))
+      1
+      ;else
+      nil
+   )
+)
+
+(defun test-horizontal-win (board player)
 	(let()
-    	(loop for x from 0 to 3
+    	(loop for r from 0 to (- row 1)
 			do(
-				loop for y from 0 to 5
+				loop for c from 0 to (- col 4)
 					do(
-						if ( and (equal (nth (+ (* 7 y) (+ x 0)) board) 1)
-				       		      (equal (nth (+ (* 7 y) (+ x 1)) board) 1)
-				   	      	      (equal (nth (+ (* 7 y) (+ x 2)) board) 1)
-				          	      (equal (nth (+ (* 7 y) (+ x 3)) board) 1) )
+						if ( and (equal (get_e r c) player)
+				       		      (equal (get_e r (+ c 1)) player)
+				   	      	      (equal (get_e r (+ c 2)) player)
+				          	      (equal (get_e r (+ c 3)) player) )
 							;(setf result 1)
-							(return-from test-player1-win-horizontal t)
+							(return-from test-horizontal-win 1)
 					)
 			)
 	    ) ; end of test horizontal wins for player 1
-		(return-from test-player1-win-horizontal nil)
+		(return-from test-horizontal-win nil)
+	)
+)
+
+(defun test-vertical-win (board player)
+	(let()
+    	(loop for c from 0 to (- col 1)
+			do(
+				loop for r from 0 to (- row 4)
+					do(
+						if ( and (equal (get_e r c) player)
+				       		      (equal (get_e (+ r 1) c) player)
+				   	      	      (equal (get_e (+ r 2) c) player)
+				          	      (equal (get_e (+ r 3) c ) player) )
+							;(setf result 1)
+							(return-from test-vertical-win 1)
+					)
+			)
+	    ) ; end of test horizontal wins for player
+		(return-from test-vertical-win nil)
+	)
+)
+
+(defun test-diagonal-win_1 (board player)
+	(let()
+    	(loop for r from 0 to (- row 4)
+			do(
+				loop for c from 0 to (- col 4)
+					do(
+						if ( and (equal (get_e r c) player)
+				       		      (equal (get_e (+ r 1) (+ c 1)) player)
+				   	      	      (equal (get_e (+ r 2) (+ c 2)) player)
+				          	      (equal (get_e (+ r 3) (+ c 3)) player) )
+							;(setf result 1)
+							(return-from test-diagonal-win_1 1)
+					)
+			)
+	    ) ; end of test horizontal wins for player 1
+		(return-from test-diagonal-win_1 nil)
+	)
+)
+
+(defun test-diagonal-win_2 (board player)
+	(let()
+    	(loop for r from 0 to (- row 4)
+			do(
+				loop for c from (- col 1) downto 3
+					do(
+						if ( and (equal (get_e r c) player)
+				       		      (equal (get_e (+ r 1) (- c 1)) player)
+				   	      	      (equal (get_e (+ r 2) (- c 2)) player)
+				          	      (equal (get_e (+ r 3) (- c 3)) player) )
+							;(setf result 1)
+							(return-from test-diagonal-win_2 1)
+					)
+			)
+	    ) ; end of test horizontal wins for player
+		(return-from test-diagonal-win_2 nil)
 	)
 )
