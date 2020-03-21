@@ -11,7 +11,7 @@
 (defparameter col 5)
 (defparameter player1 1)
 (defparameter player2 2)
-
+(defparameter empty 0)
 (defun pos (i j)
     (+ (* row i) j)
 )
@@ -90,7 +90,115 @@
     ()
 )
 (defun player_utility (board player)
+
+)
+(defun get_row_score (player)
+    (+ (get_row_score_recursive 0 player)  (get_reversed_row_score_recursive 0 player))
+)
+
+(defun get_reversed_row_score_recursive(i player)
+	(if (< i row)
+        (+  (cal_heuristic (reverse (slice board (* 5 i) col)) player) (get_reversed_row_score_recursive (+ i 1) player))
+         0
+     )
+)
+
+(defun get_row_score_recursive (i player)
+	(if (< i row)
+        (+  (cal_heuristic (slice board (* 5 i) col) player) (get_row_score_recursive (+ i 1) player))
+        0
+    )
+)
+
+(defun get_col_score (player)
+    (get_col_score_recursive 0 player)
+)
+(defun get_col_score_recursive (i player)
+	(if (< i col)
+        (+  (cal_heuristic (get_col i) player) (get_col_score_recursive (+ i 1) player))
+        0
+    )
+)
+
+
+(defun get_col (i)
+    (if (index board i )
+        (cons  (index board i ) (get_col (+ i col)))
+        '()
+    )
+)
+
+(defun get_diagonal_score (player)
+    (+ (get_left_diagonal_score_recursive 0 player) ())
+)
+
+(defun get_left_diagonal_score_recursive (i j player)
     ()
+)
+
+(defun get_right_diagonal_score_recursive (i j player)
+    ()
+)
+
+(defun get_left_diagonal (i j)
+    (if (get_e i j)
+        (cons (get_e i j) (get_left_diagonal (+ i 1) (+ j 1)))
+        '()
+    )
+)
+
+(defun get_right_diagonal (i j)
+    (if (get_e i j)
+        (cons (get_e i j) (get_right_diagonal (+ i 1) (- j 1)))
+        '()
+    )
+)
+
+
+
+(defun get-n-items
+   (lst num)
+        (if (> num 0)
+            (cons (car lst) (get-n-items (cdr lst) (- num 1))
+            )
+            '()
+         )) ;'
+
+(defun slice (lst start count)
+        (if (> start 0)
+            (slice (cdr lst) (- start 1) count)
+            (get-n-items lst count))
+)
+
+(defun index (list i)
+   (nth i list)
+)
+
+
+
+
+
+(defun cal_heuristic(line player)
+	(let()
+    	(loop for i from 0 to (- (list-length line) 1)
+			do(
+                if (and (eq empty (index line i))
+                        (eq player (index line (+ i 1)))
+                        (eq player (index line (+ i 2)))
+                        (eq player (index line (+ i 3))))
+                    (return-from cal_heuristic 100)
+
+                    ;else
+                    (if (and (eq empty (index line i))
+                             (eq player (index line (+ i 1)))
+                             (eq player (index line (+ i 2))))
+
+                            (return-from cal_heuristic 1)
+                     )
+			)
+	    ) ; end of test horizontal wins for player 1
+        (return-from cal_heuristic 0)
+	)
 )
 
 (defun terminal_test(board)
