@@ -1,6 +1,6 @@
 import unittest
 
-from connect4 import Minmax
+from connect4_backup import Minmax
 class MyTestCase(unittest.TestCase):
     def test_count_each_row_adjacent(self):
         minmax = Minmax(6, 7)
@@ -65,12 +65,12 @@ class MyTestCase(unittest.TestCase):
 
         minmax = Minmax(7,6)
 
-        terminate_ans = minmax.terminal_test(board, [''])
+        terminate_ans = minmax.game_over(board, [''])
         print(terminate_ans)
 
 
 
-    def test_node_utility(self):
+    def test_heuristic_score(self):
         board = [['x','x','o','x','o'],
                  ['o','o','o','x','o'],
                  ['x','x','o','o','o'],
@@ -79,7 +79,7 @@ class MyTestCase(unittest.TestCase):
 
         minmax = Minmax(5)
 
-        score = minmax.node_utility(board)
+        score = minmax.heuristic_score(board)
         print(score)
 
     def test_connect_four_play(self):
